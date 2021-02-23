@@ -70,3 +70,6 @@ Die Daten werden im Skript data_preprocessing.R von [Google](https://www.google.
 ## Contact
 
 [LinkedIn](https://www.linkedin.com/in/christoph-baur-89759a202/)
+
+
+Danke an @yanayankova und @franzbleck, welche ebenso am Code mitgewirkt haben!
