@@ -24,7 +24,7 @@ Der Mobilitätsindex ZH zeigt die Veränderung
 
 innerhalb der Stadt Zürich auf. Damit kann dieser Index als Hilfe/Stütze verstanden werden zu verstehen, was tatsächlich im Verkehr passiert.
 
-![Beispielplot - Verkehrsaufkommen und Veränderung des Bewegungsmuster gemäss Google](data/example_plot.png)
+![Beispielplot - Verkehrsaufkommen und Veränderung des Bewegungsmuster gemäss Google](https://github.com/christophbaur/mobilitaets_index_zh/blob/main/data/example_plot.PNG)
 
 ### Wo finde ich den Mobilitätsindex ZH?
 
