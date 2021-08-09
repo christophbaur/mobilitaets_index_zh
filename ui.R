@@ -19,16 +19,29 @@ dashboardPage(
   dashboardHeader(title = "Mobilitätsindex ZH"),
   dashboardSidebar(
     
-    HTML("<br> <p> &nbsp; &nbsp; Verkehrsaufkommen und <br> &nbsp; &nbsp; Mobilitätsverhalten <br> &nbsp; &nbsp; im Kanton Zürich </p>"),
+    HTML("<br> <p> &nbsp; &nbsp; Verkehrsaufkommen und <br> &nbsp; &nbsp; Mobilitätsverhalten <br> &nbsp; &nbsp; in der Stadt Zürich </p>"),
     #HTML("<br> <p> &nbsp; &nbsp; Wöchentliche Aktualisierung </p>"),
     
     hr(),
     
     HTML("<p><big> &nbsp; &nbsp; Inhalt </big></p>"),
-    HTML("<p> &nbsp; &nbsp; Was ist der Mobilitätsindex ZH?</p>"),
-    HTML("<p> &nbsp; &nbsp; Verkehrsaufkommen</p>"),
-    HTML("<p> &nbsp; &nbsp; Wo wurde gemessen?</p>"),
+    sidebarMenu(
+      
+      menuItem("Was ist der Mobilitätsindex ZH?",
+               href = "#wasist",
+               newtab = FALSE),
+      menuItem("Verkehrsaufkommen",
+               href = "#verkehrsaufkommen",
+               newtab = FALSE),
+      menuItem("Wo wurde gemessen?",
+               href = "#woist",
+               newtab = FALSE)
+    ),
     
+    # HTML("<p> &nbsp; &nbsp; Was ist der Mobilitätsindex ZH?</p>"),
+    # HTML("<p> &nbsp; &nbsp; Verkehrsaufkommen</p>"),
+    # HTML("<p> &nbsp; &nbsp; Wo wurde gemessen?</p>"),
+    # 
     
     
     hr(),
@@ -53,6 +66,23 @@ dashboardPage(
                               background-color: #FFFFFF;
                               }
                               
+
+                              .sidebar {
+                              color: #FFF;
+                              position: fixed;
+                              width: 220px;
+                              white-space: nowrap;
+                              overflow: visible;
+                              }
+                              
+                              .main-header {
+                              position: fixed;
+                              width:100%;
+                              }
+
+.content {
+  padding-top: 60px;
+                              }
                               '))),
 
     fluidPage(
@@ -61,13 +91,18 @@ dashboardPage(
             column(
               width=8, offset = 2, align="left",
             
-            h1("Was ist der Mobilitätsindex ZH?",align = "left"),
-            
-            p(text_einleitung),
-            
+            #scrollposition
+            span(id="wasist"),
             #extra space
             h1(HTML("<br>")),
+            h1("Was ist der Mobilitätsindex ZH?",align = "left"),
+            p(text_einleitung),
             
+           
+            #scrollposition
+            span(id = "verkehrsaufkommen"),
+            #extra space
+            h1(HTML("<br>")),
             h1("Veränderung des Verkehrsaufkommens",align = "left"),
             p(text_verk_allg),
             
@@ -92,13 +127,15 @@ dashboardPage(
                          height="100%"),
             
             p(text_google_ind),
+         
             
+            #scrollposition
+            span(id="woist"),
+            #extra space
             h1(HTML("<br>")),
             
             h1("Wo wurde gemessen?"),
-            
             p(text_karte),
-            
             leafletOutput("karte"),
             
             h1(HTML("<br>")),
