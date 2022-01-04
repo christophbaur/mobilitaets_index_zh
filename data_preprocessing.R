@@ -34,19 +34,20 @@ URL_MIV_2020 <- "https://data.stadt-zuerich.ch/dataset/6212fd20-e816-4828-a67f-9
 #MIV 2021
 URL_MIV_2021 <- "https://data.stadt-zuerich.ch/dataset/6212fd20-e816-4828-a67f-90f057f25ddb/resource/b2b5730d-b816-4c20-a3a3-ab2567f81574/download/sid_dav_verkehrszaehlung_miv_od2031_2021.csv"
 #MIV 2022
-#tbd
+URL_MIV_2022 <- "https://data.stadt-zuerich.ch/dataset/6212fd20-e816-4828-a67f-90f057f25ddb/resource/bc2d7c35-de13-45e9-be21-538d9eab3653/download/sid_dav_verkehrszaehlung_miv_od2031_2022.csv"
 #Velo 2020
 URL_Velo_2020 <- "https://data.stadt-zuerich.ch/dataset/83ca481f-275c-417b-9598-3902c481e400/resource/b9308f85-9066-4f5b-8eab-344c790a6982/download/2020_verkehrszaehlungen_werte_fussgaenger_velo.csv"
 #Velo 2021
 URL_Velo_2021 <- "https://data.stadt-zuerich.ch/dataset/83ca481f-275c-417b-9598-3902c481e400/resource/ebe5e78c-a99f-4607-bedc-051f33d75318/download/2021_verkehrszaehlungen_werte_fussgaenger_velo.csv"
 #Velo 2022
-#tbd
+URL_Velo_2022 <- "https://data.stadt-zuerich.ch/dataset/83ca481f-275c-417b-9598-3902c481e400/resource/9a9f9221-d6a0-4289-9962-410557adef93/download/2022_verkehrszaehlungen_werte_fussgaenger_velo.csv"
 #öV 2020
 URL_oev_2020 <- "https://data.stadt-zuerich.ch/dataset/vbz_frequenzen_hardbruecke/download/frequenzen_hardbruecke_2020.csv"
 #öV 2021
 URL_oev_2021 <- "https://data.stadt-zuerich.ch/dataset/vbz_frequenzen_hardbruecke/download/frequenzen_hardbruecke_2021.csv"
 #öV 2022
-#tbd
+URL_oev_2022 <- "https://data.stadt-zuerich.ch/dataset/vbz_frequenzen_hardbruecke/download/frequenzen_hardbruecke_2022.csv"
+
 
 #Google
 URL_google <- "https://storage.googleapis.com/covid19-open-data/v2/CH_ZH/main.csv"
@@ -56,7 +57,8 @@ URL_google <- "https://storage.googleapis.com/covid19-open-data/v2/CH_ZH/main.cs
 URL_wetter_2020 <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2020.csv"
 #Wetter 2021
 URL_wetter_2021 <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2021.csv"
-
+#Wetter 2022
+URL_wetter_2022 <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2022.csv"
 
 #Funktionen
 # downloadData <- function(url, destination){
@@ -78,10 +80,17 @@ data_miv_raw21 <- read.csv(URL_MIV_2021,
                            stringsAsFactors = FALSE,
                            encoding = "UTF-8")
 
+data_miv_raw22 <- read.csv(URL_MIV_2022,
+                           stringsAsFactors = FALSE,
+                           encoding = "UTF-8")
+
 #in einem Datensatz bündeln
-data_miv_raw<-rbind(data_miv_raw20, data_miv_raw21)
+data_miv_raw<-rbind(data_miv_raw20,
+                    data_miv_raw21,
+                    data_miv_raw22)
 rm(data_miv_raw20)
 rm(data_miv_raw21)
+rm(data_miv_raw22)
 
 # Datenformat ändern
 data_miv_raw$datetime <- as.Date(as.POSIXct(data_miv_raw$MessungDatZeit, 
@@ -204,7 +213,8 @@ COL_SPEC_COUNTING_DATA <- cols_only(FK_ZAEHLER = col_character(),
                                     FUSS_IN = col_integer(),
                                     FUSS_OUT = col_integer(),
                                     OST = col_integer(),
-                                    NORD = col_integer())
+                                    NORD = col_integer()
+                                    )
 
 
 data_velo_raw20 <- read_csv(URL_Velo_2020,
@@ -213,10 +223,16 @@ data_velo_raw20 <- read_csv(URL_Velo_2020,
 data_velo_raw21 <- read_csv(URL_Velo_2021,
                            col_types = COL_SPEC_COUNTING_DATA)
 
+data_velo_raw22 <- read_csv(URL_Velo_2022,
+                            col_types = COL_SPEC_COUNTING_DATA)
+
 #in einem Datensatz bündeln
-data_velo_raw<-rbind(data_velo_raw20, data_velo_raw21)
+data_velo_raw<-rbind(data_velo_raw20,
+                     data_velo_raw21,
+                     data_velo_raw22)
 rm(data_velo_raw20)
 rm(data_velo_raw21)
+rm(data_velo_raw22)
 
 
 #### >> Aufbau Referenzwerte ####
@@ -341,10 +357,16 @@ data_oev_raw20 <- read.csv(URL_oev_2020,
 data_oev_raw21 <- read.csv(URL_oev_2021,
                            stringsAsFactors = FALSE)
 
+data_oev_raw22 <- read.csv(URL_oev_2022,
+                           stringsAsFactors = FALSE)
+
 #in einem Datensatz bündeln
-data_oev_raw<-rbind(data_oev_raw20, data_oev_raw21)
+data_oev_raw<-rbind(data_oev_raw20,
+                    data_oev_raw21,
+                    data_oev_raw22)
 rm(data_oev_raw20)
 rm(data_oev_raw21)
+rm(data_oev_raw22)
 
 #Nur Zählstelle "VBZ"
 data_oev_reduced <- data_oev_raw%>%
@@ -434,9 +456,15 @@ data_wetter_2020_raw <- read.csv(URL_wetter_2020,
 data_wetter_2021_raw <- read.csv(URL_wetter_2021,
                         encoding = "UTF-8")
 
-data_wetter_raw<-rbind(data_wetter_2020_raw,data_wetter_2021_raw)
+data_wetter_2022_raw <- read.csv(URL_wetter_2022,
+                        encoding = "UTF-8")
+
+data_wetter_raw<-rbind(data_wetter_2020_raw,
+                       data_wetter_2021_raw,
+                       data_wetter_2022_raw)
 rm(data_wetter_2020_raw,
-   data_wetter_2021_raw)
+   data_wetter_2021_raw,
+   data_wetter_2022_raw)
 
 #### Format Datum
 
