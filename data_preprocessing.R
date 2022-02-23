@@ -28,42 +28,33 @@ library(reshape2)
 library(data.table)
 
 
-# Daten von der OpenData-Plattform der Stadt Zürich laden
-#MIV 2020
-URL_MIV_2020 <- "https://data.stadt-zuerich.ch/dataset/6212fd20-e816-4828-a67f-90f057f25ddb/resource/44607195-a2ad-4f9b-b6f1-d26c003d85a2/download/sid_dav_verkehrszaehlung_miv_od2031_2020.csv"
-#MIV 2021
-URL_MIV_2021 <- "https://data.stadt-zuerich.ch/dataset/6212fd20-e816-4828-a67f-90f057f25ddb/resource/b2b5730d-b816-4c20-a3a3-ab2567f81574/download/sid_dav_verkehrszaehlung_miv_od2031_2021.csv"
-#MIV 2022
-URL_MIV_2022 <- "https://data.stadt-zuerich.ch/dataset/6212fd20-e816-4828-a67f-90f057f25ddb/resource/bc2d7c35-de13-45e9-be21-538d9eab3653/download/sid_dav_verkehrszaehlung_miv_od2031_2022.csv"
-#Velo 2020
-URL_Velo_2020 <- "https://data.stadt-zuerich.ch/dataset/83ca481f-275c-417b-9598-3902c481e400/resource/b9308f85-9066-4f5b-8eab-344c790a6982/download/2020_verkehrszaehlungen_werte_fussgaenger_velo.csv"
-#Velo 2021
-URL_Velo_2021 <- "https://data.stadt-zuerich.ch/dataset/83ca481f-275c-417b-9598-3902c481e400/resource/ebe5e78c-a99f-4607-bedc-051f33d75318/download/2021_verkehrszaehlungen_werte_fussgaenger_velo.csv"
-#Velo 2022
-URL_Velo_2022 <- "https://data.stadt-zuerich.ch/dataset/83ca481f-275c-417b-9598-3902c481e400/resource/9a9f9221-d6a0-4289-9962-410557adef93/download/2022_verkehrszaehlungen_werte_fussgaenger_velo.csv"
-#öV 2020
-URL_oev_2020 <- "https://data.stadt-zuerich.ch/dataset/vbz_frequenzen_hardbruecke/download/frequenzen_hardbruecke_2020.csv"
-#öV 2021
-URL_oev_2021 <- "https://data.stadt-zuerich.ch/dataset/vbz_frequenzen_hardbruecke/download/frequenzen_hardbruecke_2021.csv"
-#öV 2022
-URL_oev_2022 <- "https://data.stadt-zuerich.ch/dataset/vbz_frequenzen_hardbruecke/download/frequenzen_hardbruecke_2022.csv"
 
+# Sequenz aufbauen mit beginn 2020 und Ende als aktuelles Jahr
+jahre <- seq(2020, year(Sys.time()), by = 1)
+
+#Basis-URL MIV (es fehlt am ende <YYYY>.csv)
+URL_Basis_MIV <- "https://data.stadt-zuerich.ch/dataset/sid_dav_verkehrszaehlung_miv_od2031/download/sid_dav_verkehrszaehlung_miv_OD2031_"
+#Speicherort inkl. suffix
+path_miv <- "data/miv_"
+
+#Basis-URL Velo (das Jahr steht irgendwo am anfang)
+URL_Basis_velo1 <- "https://data.stadt-zuerich.ch/dataset/ted_taz_verkehrszaehlungen_werte_fussgaenger_velo/download/"
+URL_Basis_velo2 <- "_verkehrszaehlungen_werte_fussgaenger_velo"
+#Speicherort inkl. suffix
+path_velo <- "data/velo_"
+
+#Basis-URL Oev
+URL_Basis_oev <- "https://data.stadt-zuerich.ch/dataset/vbz_frequenzen_hardbruecke/download/frequenzen_hardbruecke_"
+#Speicherort inkl. suffix
+path_oev <- "data/oev_"
+
+#Basis-URL wetter
+URL_Basis_wetter <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_"
+#Speicherort inkl. suffix
+path_wetter <- "data/wetter_"
 
 #Google
 URL_google <- "https://storage.googleapis.com/covid19-open-data/v2/CH_ZH/main.csv"
-
-#Wetter
-#Wetter 2020
-URL_wetter_2020 <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2020.csv"
-#Wetter 2021
-URL_wetter_2021 <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2021.csv"
-#Wetter 2022
-URL_wetter_2022 <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2022.csv"
-
-#Funktionen
-# downloadData <- function(url, destination){
-#   download.file(url, destination, method = "auto", quiet = TRUE)
-# }
 
 
 #________________________________________________________________
@@ -72,25 +63,68 @@ URL_wetter_2022 <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmi
 
 #### > MIV ####
 #### >> Daten beziehen/verarbeiten ####
-data_miv_raw20 <- read.csv(URL_MIV_2020,
-                           stringsAsFactors = FALSE,
-                           encoding = "UTF-8")
+# leere Ergebnisliste erzeugen
+list_result_miv <- list()
+# for-schleife um die MIV-daten je Jahr zu beziehen
+for (i in 1:length(jahre)) {
+  # i=2
+  
+  url_miv <- paste0(
+    URL_Basis_MIV,
+    jahre[i], ".csv"
+  )
+  
+  # Wenn das file nicht existiert, lade es heruntern
+  # wenn das file existiert, wir aber im laufenden jahr sind, lade es herunter
+  # wenn das file existierst, wir aber im laufenden jahr +30 tage sind, lade es dennoch herunter
+  # (die Erfahrung zeigt, dass gerade zwischen Weihnachten und neujahr die Daten erst später nachgefuehrt werden)
+  
+  if (!file.exists(paste0(path_miv, jahre[i], ".csv")) | (
+    file.exists(paste0(path_miv, jahre[i], ".csv")) &
+    (year(Sys.Date() - days(30)) == jahre[i] | year(Sys.Date()) == jahre[i]))) {
+    
+    # Abfrage mittels tryCatch, d.h. wenn die URL fürs aktuelle jahr (noch) nicht existiert mach dennoch weiter, gib aber die
+    # Meldung aus womit man das nachvollziehen kann
+    tryCatch(
+      {
+        download.file(url_miv,
+                      paste0(path_miv, jahre[i], ".csv"),
+                      method = "auto", quiet = TRUE
+        )
+      },
+      error = function(cond) {
+        message(paste("URL does not seem to exist (yet):", url_miv))
+        message("Here's the original error message:")
+        message(cond)
+        # gib "NA" Zurück, das wird dann in rbind zu einer NA-Datenzeile, ist handlebar, ansosnten kommen die
+        # Fehlermeldungen als String rein was Probleme bereitet
+        return(NA)
+      }
+    )
+  }
+  
+  # Daten laden von der festplatte mittels tryCatch
+  list_result_miv[[i]] <- tryCatch(
+    {
+      read.csv(paste0(path_miv, jahre[i], ".csv"),
+               stringsAsFactors = FALSE
+      )
+    },
+    error = function(cond) {
+      message(paste("Datensatz zu ", jahre[i], " (noch) nicht vorhanden"))
+      message("Here's the original error message:")
+      message(cond)
+      # gib "NA" Zurück, das wird dann in rbind zu einer NA-Datenzeile, ist handlebar, ansosnten kommen die
+      # Fehlermeldungen als String rein was Probleme bereitet
+      return(NA)
+    }
+  )
+  # url löschen um sauber zu sein für die nächste iteration
+  rm(url_miv)
+}
+# ergebnisse aus for-Schleife zusammenführen
+data_miv_raw <- as.data.frame(do.call(rbind, list_result_miv))
 
-data_miv_raw21 <- read.csv(URL_MIV_2021,
-                           stringsAsFactors = FALSE,
-                           encoding = "UTF-8")
-
-data_miv_raw22 <- read.csv(URL_MIV_2022,
-                           stringsAsFactors = FALSE,
-                           encoding = "UTF-8")
-
-#in einem Datensatz bündeln
-data_miv_raw<-rbind(data_miv_raw20,
-                    data_miv_raw21,
-                    data_miv_raw22)
-rm(data_miv_raw20)
-rm(data_miv_raw21)
-rm(data_miv_raw22)
 
 # Datenformat ändern
 data_miv_raw$datetime <- as.Date(as.POSIXct(data_miv_raw$MessungDatZeit, 
@@ -214,25 +248,70 @@ COL_SPEC_COUNTING_DATA <- cols_only(FK_ZAEHLER = col_character(),
                                     FUSS_OUT = col_integer(),
                                     OST = col_integer(),
                                     NORD = col_integer()
-                                    )
+)
+# leere Ergebnisliste erzeugen
+list_result_velo <- list()
+# for-schleife um die Velodaten je Jahr zu beziehen
+for (i in 1:length(jahre)) {
+  # i=2
+  
+  url_velo <- paste0(
+    URL_Basis_velo1,
+    jahre[i],
+    URL_Basis_velo2, ".csv"
+  )
+  
+  # Wenn das file nicht existiert, lade es heruntern
+  # wenn das file existiert, wir aber im laufenden jahr sind, lade es herunter
+  # wenn das file existierst, wir aber im laufenden jahr +30 tage sind, lade es dennoch herunter
+  # (die Erfahrung zeigt, dass gerade zwischen Weihnachten und neujahr die Daten erst später nachgefuehrt werden)
+  
+  if (!file.exists(paste0(path_velo, jahre[i], ".csv")) | (
+    file.exists(paste0(path_velo, jahre[i], ".csv")) &
+    (year(Sys.Date() - days(30)) == jahre[i] | year(Sys.Date()) == jahre[i]))) {
+    
+    # Abfrage mittels tryCatch, d.h. wenn die URL fürs aktuelle jahr (noch) nicht existiert mach dennoch weiter, gib aber die
+    # Meldung aus womit man das nachvollziehen kann
+    tryCatch(
+      {
+        download.file(url_velo,
+                      paste0(path_velo, jahre[i], ".csv"),
+                      method = "auto", quiet = TRUE
+        )
+      },
+      error = function(cond) {
+        message(paste("URL does not seem to exist (yet):", url_velo))
+        message("Here's the original error message:")
+        message(cond)
+        # gib "NA" Zurück, das wird dann in rbind zu einer NA-Datenzeile, ist handlebar, ansosnten kommen die
+        # Fehlermeldungen als String rein was Probleme bereitet
+        return(NA)
+      }
+    )
+  }
+  
+  # Daten laden von der festplatte mittels tryCatch
+  list_result_velo[[i]] <- tryCatch(
+    {
+      read_csv(paste0(path_velo, jahre[i], ".csv"),
+               col_types = COL_SPEC_COUNTING_DATA
+      )
+    },
+    error = function(cond) {
+      message(paste("Datensatz zu ", jahre[i], " (noch) nicht vorhanden"))
+      message("Here's the original error message:")
+      message(cond)
+      # gib "NA" Zurück, das wird dann in rbind zu einer NA-Datenzeile, ist handlebar, ansosnten kommen die
+      # Fehlermeldungen als String rein was Probleme bereitet
+      return(NA)
+    }
+  )
+  # url löschen um sauber zu sein für die nächste iteration
+  rm(url_velo)
+}
+# ergebnisse aus for-Schleife zusammenführen
+data_velo_raw <- as.data.frame(do.call(rbind, list_result_velo))
 
-
-data_velo_raw20 <- read_csv(URL_Velo_2020,
-                           col_types = COL_SPEC_COUNTING_DATA)
-
-data_velo_raw21 <- read_csv(URL_Velo_2021,
-                           col_types = COL_SPEC_COUNTING_DATA)
-
-data_velo_raw22 <- read_csv(URL_Velo_2022,
-                            col_types = COL_SPEC_COUNTING_DATA)
-
-#in einem Datensatz bündeln
-data_velo_raw<-rbind(data_velo_raw20,
-                     data_velo_raw21,
-                     data_velo_raw22)
-rm(data_velo_raw20)
-rm(data_velo_raw21)
-rm(data_velo_raw22)
 
 
 #### >> Aufbau Referenzwerte ####
@@ -351,22 +430,70 @@ geo_velo <- as.data.frame(geo_velo)
 
 #### >> Daten beziehen/verarbeiten ####
 
-data_oev_raw20 <- read.csv(URL_oev_2020,
-                           stringsAsFactors = FALSE)
+# leere Ergebnisliste erzeugen
+list_result_oev <- list()
+# for-schleife um die Oev-daten je Jahr zu beziehen
+for (i in 1:length(jahre)) {
+  # i=2
+  
+  url_oev <- paste0(
+    URL_Basis_oev,
+    jahre[i], ".csv"
+  )
+  
+  # Wenn das file nicht existiert, lade es heruntern
+  # wenn das file existiert, wir aber im laufenden jahr sind, lade es herunter
+  # wenn das file existierst, wir aber im laufenden jahr +30 tage sind, lade es dennoch herunter
+  # (die Erfahrung zeigt, dass gerade zwischen Weihnachten und neujahr die Daten erst später nachgefuehrt werden)
+  
+  if (!file.exists(paste0(path_oev, jahre[i], ".csv")) | (
+    file.exists(paste0(path_oev, jahre[i], ".csv")) &
+    (year(Sys.Date() - days(30)) == jahre[i] | year(Sys.Date()) == jahre[i]))) {
+    
+    # Abfrage mittels tryCatch, d.h. wenn die URL fürs aktuelle jahr (noch) nicht existiert mach dennoch weiter, gib aber die
+    # Meldung aus womit man das nachvollziehen kann
+    tryCatch(
+      {
+        download.file(url_oev,
+                      paste0(path_oev, jahre[i], ".csv"),
+                      method = "auto", quiet = TRUE
+        )
+      },
+      error = function(cond) {
+        message(paste("URL does not seem to exist (yet):", url_oev))
+        message("Here's the original error message:")
+        message(cond)
+        # gib "NA" Zurück, das wird dann in rbind zu einer NA-Datenzeile, ist handlebar, ansosnten kommen die
+        # Fehlermeldungen als String rein was Probleme bereitet
+        return(NA)
+      }
+    )
+  }
+  
+  # Daten laden von der festplatte mittels tryCatch
+  list_result_oev[[i]] <- tryCatch(
+    {
+      read.csv(paste0(path_oev, jahre[i], ".csv"),
+               stringsAsFactors = FALSE
+      )
+    },
+    error = function(cond) {
+      message(paste("Datensatz zu ", jahre[i], " (noch) nicht vorhanden"))
+      message("Here's the original error message:")
+      message(cond)
+      # gib "NA" Zurück, das wird dann in rbind zu einer NA-Datenzeile, ist handlebar, ansosnten kommen die
+      # Fehlermeldungen als String rein was Probleme bereitet
+      return(NA)
+    }
+  )
+  # url löschen um sauber zu sein für die nächste iteration
+  rm(url_oev)
+}
+# ergebnisse aus for-Schleife zusammenführen
+data_oev_raw <- as.data.frame(do.call(rbind, list_result_oev))
 
-data_oev_raw21 <- read.csv(URL_oev_2021,
-                           stringsAsFactors = FALSE)
 
-data_oev_raw22 <- read.csv(URL_oev_2022,
-                           stringsAsFactors = FALSE)
 
-#in einem Datensatz bündeln
-data_oev_raw<-rbind(data_oev_raw20,
-                    data_oev_raw21,
-                    data_oev_raw22)
-rm(data_oev_raw20)
-rm(data_oev_raw21)
-rm(data_oev_raw22)
 
 #Nur Zählstelle "VBZ"
 data_oev_reduced <- data_oev_raw%>%
@@ -450,21 +577,69 @@ geo_oev <- tibble(vsys="oev",
                   NKoord = 1248789)
 
 #### > Wetter ####
-data_wetter_2020_raw <- read.csv(URL_wetter_2020,
-                        encoding = "UTF-8")
+# leere Ergebnisliste erzeugen
+list_result_wetter <- list()
+# for-schleife um die Wetterdaten je Jahr zu beziehen
+for (i in 1:length(jahre)) {
+  # i=2
+  
+  url_wetter <- paste0(
+    URL_Basis_wetter,
+    jahre[i], ".csv"
+  )
+  
+  # Wenn das file nicht existiert, lade es heruntern
+  # wenn das file existiert, wir aber im laufenden jahr sind, lade es herunter
+  # wenn das file existierst, wir aber im laufenden jahr +30 tage sind, lade es dennoch herunter
+  # (die Erfahrung zeigt, dass gerade zwischen Weihnachten und neujahr die Daten erst später nachgefuehrt werden)
+  
+  if (!file.exists(paste0(path_wetter, jahre[i], ".csv")) | (
+    file.exists(paste0(path_wetter, jahre[i], ".csv")) &
+    (year(Sys.Date() - days(30)) == jahre[i] | year(Sys.Date()) == jahre[i]))) {
+    
+    # Abfrage mittels tryCatch, d.h. wenn die URL fürs aktuelle jahr (noch) nicht existiert mach dennoch weiter, gib aber die
+    # Meldung aus womit man das nachvollziehen kann
+    tryCatch(
+      {
+        download.file(url_wetter,
+                      paste0(path_wetter, jahre[i], ".csv"),
+                      method = "auto", quiet = TRUE
+        )
+      },
+      error = function(cond) {
+        message(paste("URL does not seem to exist (yet):", url_wetter))
+        message("Here's the original error message:")
+        message(cond)
+        # gib "NA" Zurück, das wird dann in rbind zu einer NA-Datenzeile, ist handlebar, ansosnten kommen die
+        # Fehlermeldungen als String rein was Probleme bereitet
+        return(NA)
+      }
+    )
+  }
+  
+  # Daten laden von der festplatte mittels tryCatch
+  list_result_wetter[[i]] <- tryCatch(
+    {
+      read.csv(paste0(path_wetter, jahre[i], ".csv"),
+               encoding = "UTF-8"
+      )
+    },
+    error = function(cond) {
+      message(paste("Datensatz zu ", jahre[i], " (noch) nicht vorhanden"))
+      message("Here's the original error message:")
+      message(cond)
+      # gib "NA" Zurück, das wird dann in rbind zu einer NA-Datenzeile, ist handlebar, ansosnten kommen die
+      # Fehlermeldungen als String rein was Probleme bereitet
+      return(NA)
+    }
+  )
+  # url löschen um sauber zu sein für die nächste iteration
+  rm(url_wetter)
+}
+# ergebnisse aus for-Schleife zusammenführen
+data_wetter_raw <- as.data.frame(do.call(rbind, list_result_wetter))
 
-data_wetter_2021_raw <- read.csv(URL_wetter_2021,
-                        encoding = "UTF-8")
 
-data_wetter_2022_raw <- read.csv(URL_wetter_2022,
-                        encoding = "UTF-8")
-
-data_wetter_raw<-rbind(data_wetter_2020_raw,
-                       data_wetter_2021_raw,
-                       data_wetter_2022_raw)
-rm(data_wetter_2020_raw,
-   data_wetter_2021_raw,
-   data_wetter_2022_raw)
 
 #### Format Datum
 
@@ -566,7 +741,7 @@ fwrite(mobility_index,
           "data/mobility_index.csv",
           row.names = FALSE)
 
-fwrite(geo_info,
-          "data/geo_info.csv",
-          row.names = FALSE,
-       quote = TRUE)
+# fwrite(geo_info,
+#           "data/geo_info.csv",
+#           row.names = FALSE,
+#        quote = TRUE)
