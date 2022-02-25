@@ -738,10 +738,10 @@ geo_info <- rbind(geo_miv,
 
 #### >> schreiben ####
 fwrite(mobility_index,
-          "data/mobility_index.csv",
+          "mobility_index.csv",
           row.names = FALSE)
 
-# fwrite(geo_info,
-#           "data/geo_info.csv",
-#           row.names = FALSE,
-#        quote = TRUE)
+fwrite(geo_info,
+          "geo_info.csv",
+          row.names = FALSE,
+       quote = TRUE)
