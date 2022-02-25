@@ -3,10 +3,10 @@ source("fct_plot_google_ind.R", local = TRUE)
 source("fct_karte.R", local = TRUE)
 
 #laden der Daten
-mobility_index <- read.csv("data/mobility_index.csv")%>%
+mobility_index <- read.csv("mobility_index.csv")%>%
   mutate(Date=as.Date(Date))
 
-geo_info <- read.csv("data/geo_info.csv")
+geo_info <- read.csv("geo_info.csv")
 
  
 

@@ -1,12 +1,15 @@
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
+# library(dashboardthemes)
+# library(thematic)
 
 library(readr)
 library(sf)
 library(leaflet)
 library(dplyr)
 library(plotly)
+
 
 options(encoding = "UTF-8")
 
@@ -16,6 +19,7 @@ source("text.R", local=TRUE)
 
 
 dashboardPage(
+  
   dashboardHeader(title = "Mobilitätsindex ZH"),
   dashboardSidebar(
     
@@ -59,13 +63,16 @@ dashboardPage(
     )
   ),
   dashboardBody(
+    # shinyDashboardThemes(
+    #   theme = "grey_dark"
+    # ),
     tags$head(tags$style(HTML('
-                              
+
                               /* body */
                               .content-wrapper, .right-side {
-                              background-color: #FFFFFF;
+                              background-color: #FFFFFF
                               }
-                              
+
 
                               .sidebar {
                               color: #FFF;
@@ -74,7 +81,7 @@ dashboardPage(
                               white-space: nowrap;
                               overflow: visible;
                               }
-                              
+
                               .main-header {
                               position: fixed;
                               width:100%;
