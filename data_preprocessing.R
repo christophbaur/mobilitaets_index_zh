@@ -54,7 +54,7 @@ URL_Basis_wetter <- "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesm
 path_wetter <- "data/wetter_"
 
 #Google
-URL_google <- "https://storage.googleapis.com/covid19-open-data/v2/CH_ZH/main.csv"
+URL_google <- "https://storage.googleapis.com/covid19-open-data/v3/mobility.csv"
 
 
 #________________________________________________________________
@@ -664,15 +664,19 @@ data_wetter<-dcast(data_wetter, date~Parameter )%>%
 
 #### > Google Mobilität ####
 
-google_mobility <- read.csv(URL_google,
-                            stringsAsFactors = FALSE,
-                            encoding = 'UTF-8')
+#Daten von Google beziehen (Komplett, ungefiltert da es derzeit(?) nicht möglich ist einen key
+#in der URL mitzugeben wie eigentlich hier beschrieben https://github.com/GoogleCloudPlatform/covid-19-open-data)
+
+google_mobility <- data.table::fread(URL_google, 
+                                     na.strings = c("", "NA", "#N/A"))%>%
+  filter(location_key=="CH_ZH")
+
 
 #Divese umformatierungen/selektionen
 google_mobility_reduced <- google_mobility%>%
   #Datum umwandeln
   mutate(date=as.Date(as.POSIXct(date)))%>%
-  #Jede Menge Spalten welche hierfür uninteressant sind
+  #Nur die relevanten Spalten behalten
   select(date,
          mobility_retail_and_recreation,
          mobility_grocery_and_pharmacy,
@@ -741,7 +745,7 @@ fwrite(mobility_index,
           "mobility_index.csv",
           row.names = FALSE)
 
-fwrite(geo_info,
-          "geo_info.csv",
-          row.names = FALSE,
-       quote = TRUE)
+# fwrite(geo_info,
+#           "geo_info.csv",
+#           row.names = FALSE,
+#        quote = TRUE)
