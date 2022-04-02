@@ -64,8 +64,19 @@ fig1 <- plot_ly(mobility_index,
                   opacity=0.5,
                   font = list(size=9)
   )%>%
-  
-
+  #'Freedome-day'
+  add_annotations(x = as.Date('2022-04-01'),
+                  y = 0,
+                  text ='<b>Aufheben aller Massnahmen</b>',
+                  #textangle = -90,
+                  xref = "x",
+                  yref = "y",
+                  ax = 0,
+                  ay = -225,
+                  showarrow = TRUE,
+                  arrowhead  = 7,
+                  opacity=0.5,
+                  font = list(size=9))%>%
   layout(
     #title = "Verkehrsaufkommen, indexiert",
     yaxis = A_Axis,
